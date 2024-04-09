@@ -1,8 +1,8 @@
 from rest_framework import serializers
-from .models import LaunchLocations
+from .models import LaunchLocation
 
 
-class LaunchLocationsSerializer(serializers.ModelSerializer):
+class LaunchLocationSerializer(serializers.ModelSerializer):
     class Meta:
-        model = LaunchLocations
+        model = LaunchLocation
         fields = '__all__'

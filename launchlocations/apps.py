@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
 
-class LaunchlocationsConfig(AppConfig):
+class LaunchLocationConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'launchlocations'

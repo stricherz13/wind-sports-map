@@ -11,7 +11,7 @@ class Direction(models.Model):
         return self.get_name_display()
 
 
-class LaunchLocations(models.Model):
+class LaunchLocation(models.Model):
     skill_choices = (("Be", "Beginner"), ("In", "Intermediate"), ("Ad", "Advanced"))
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -24,7 +24,7 @@ class LaunchLocations(models.Model):
     parking = models.BooleanField(default=False, null=False)
     public = models.BooleanField(default=False, null=False)
     description = models.TextField()
-    # picture = models.ImageField(upload_to='launchlocations', blank=True)
+    # picture = models.ImageField(upload_to='launchlocation', blank=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
@@ -32,7 +32,7 @@ class LaunchLocations(models.Model):
 
 
 class Weather(models.Model):
-    id = models.ForeignKey('LaunchLocations', on_delete=models.CASCADE, unique=True, primary_key=True)
+    id = models.ForeignKey('LaunchLocation', on_delete=models.CASCADE, unique=True, primary_key=True)
     ws_name = models.CharField(max_length=100)
     temp = models.FloatField()
     wind = models.FloatField()

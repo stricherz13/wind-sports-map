@@ -1,8 +1,8 @@
 from rest_framework import generics
-from .models import LaunchLocations
-from .serializers import LaunchLocationsSerializer
+from .models import LaunchLocation
+from .serializers import LaunchLocationSerializer
 
 
-class LaunchLocationsListView(generics.ListAPIView):
-    queryset = LaunchLocations.objects.all()
-    serializer_class = LaunchLocationsSerializer
+class LaunchLocationListView(generics.ListAPIView):
+    queryset = LaunchLocation.objects.all()
+    serializer_class = LaunchLocationSerializer

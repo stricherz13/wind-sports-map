@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime
 
 import requests
 import time
@@ -27,22 +27,29 @@ launchsites = [
         "lat": 38.05135955074948,
         "lng": -88.95676326852967,
         "direction": ["North", "Northeast", "South", "Southwest", "West", "Northwest"]
+    },
+    {
+        "Name": "South Haven",
+        "lat": 42.402870500131954,
+        "lng": -86.28366931556243,
+        "direction": ["Southwest", "West", "Northwest", "North"]
     }
 ]
 
 
 def updatemarker(lat, lng, direction):
-    currentTimeUTC = datetime.now(timezone.utc)
-    formattedCurrentTime = currentTimeUTC.strftime("%I:%M:%S %p")
+    currentTimeUTC = datetime.utcnow()
     try:
-        url = f"https://api.sunrisesunset.io/json?lat={lat}&lng={lng}&timezone=UTC"
+        url = f"https://api.sunrise-sunset.org/json?lat={lat}&lng={lng}&formatted=0"
         response = requests.get(url)
         if response.status_code == 200:
             data = response.json()
-            sunrise = data['results']['sunrise']
-            sunset = data['results']['sunset']
-            print(f"Sunrise: {sunrise} | Sunset: {sunset} | Current Time: {formattedCurrentTime}")
-            if sunrise > formattedCurrentTime < sunset:
+            sunrise_str = data["results"]["sunrise"]
+            sunset_str = data["results"]["sunset"]
+            sunrise = datetime.strptime(sunrise_str, "%Y-%m-%dT%H:%M:%S+00:00")
+            sunset = datetime.strptime(sunset_str, "%Y-%m-%dT%H:%M:%S+00:00")
+            print(f"Sunrise: {sunrise} | Sunset: {sunset} | Current Time: {currentTimeUTC}")
+            if sunrise < currentTimeUTC < sunset:
                 try:
                     url = f"https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lng}&appid=6ece76affa411be60affa4ee66ee2d62&units=imperial"
                     response = requests.get(url)
@@ -72,10 +79,17 @@ def updatemarker(lat, lng, direction):
                             winddirection = "West"
                         elif 303.75 <= degrees <= 348.74:
                             winddirection = "Northwest"
-                        print(
-                            f"The {name} weather station is currently reporting a wind speed of {wind} knots. The "
-                            f"wind is coming from the {winddirection} direction. The gusts are reaching up to "
-                            f"{windgust} knots. The current temperature is {temp} degrees Fahrenheit.")
+
+                        if windgust is None:
+                            print(
+                                f"The {name} weather station is currently reporting a wind speed of {wind} knots. The "
+                                f"wind is coming from the {winddirection} direction. The current temperature is {temp} "
+                                f"degrees Fahrenheit.")
+                        else:
+                            print(
+                                f"The {name} weather station is currently reporting a wind speed of {wind} knots. The "
+                                f"wind is coming from the {winddirection} direction. The gusts are reaching up to "
+                                f"{windgust} knots. The current temperature is {temp} degrees Fahrenheit.")
                         if wind >= 10.00 and winddirection in direction and temp >= 50.00:
                             print("Green")
                         elif wind >= 10.00 and winddirection not in direction and temp >= 30.00:
