@@ -1,4 +1,6 @@
 from django.db import models
+from django.utils import timezone
+from django.contrib.auth.models import User
 import uuid
 
 
@@ -25,10 +27,11 @@ class LaunchLocation(models.Model):
     public = models.BooleanField(default=False, null=False)
     description = models.TextField()
     # picture = models.ImageField(upload_to='launchlocation', blank=True)
+    # user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='launchlocations')
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return str(self.id)
+        return str(self.name)
 
 
 class Weather(models.Model):
@@ -36,8 +39,9 @@ class Weather(models.Model):
     ws_name = models.CharField(max_length=100)
     temp = models.FloatField()
     wind = models.FloatField()
-    windgust = models.FloatField()
-    winddirection = models.CharField(max_length=100)
+    windgust = models.FloatField(null=True)
+    winddirection = models.CharField(max_length=50)
+    condition = models.CharField(max_length=20)
     marker = models.CharField(max_length=10, default="red")
     updated_at = models.DateTimeField(auto_now=True)
 

@@ -33,11 +33,29 @@ launchsites = [
         "lat": 42.402870500131954,
         "lng": -86.28366931556243,
         "direction": ["Southwest", "West", "Northwest", "North"]
+    },
+    {
+        "Name": "Lake Poinsett",
+        "lat": 44.53875172083404,
+        "lng": -97.07681880361784,
+        "direction": ["Northeast", "West", "Northwest", "North"]
+    },
+    {
+        "Name": "Stockton Lake (West Launch)",
+        "lat": 37.67556554494834,
+        "lng": -93.7718652208572,
+        "direction": ["South", "Southeast", "East", "Northeast", "North", "Northwest"]
+    },
+    {
+        "Name": "Silver Creek (Sunset Bay Beach Park",
+        "lat": 42.564415590075406,
+        "lng": -79.13901397057322,
+        "direction": ["North", "Southwest", "West", "Northwest"]
     }
 ]
 
 
-def updatemarker(lat, lng, direction):
+def updatemarker(lat, lng, direction, name):
     currentTimeUTC = datetime.utcnow()
     try:
         url = f"https://api.sunrise-sunset.org/json?lat={lat}&lng={lng}&formatted=0"
@@ -48,16 +66,17 @@ def updatemarker(lat, lng, direction):
             sunset_str = data["results"]["sunset"]
             sunrise = datetime.strptime(sunrise_str, "%Y-%m-%dT%H:%M:%S+00:00")
             sunset = datetime.strptime(sunset_str, "%Y-%m-%dT%H:%M:%S+00:00")
-            print(f"Sunrise: {sunrise} | Sunset: {sunset} | Current Time: {currentTimeUTC}")
+            # print(f"Sunrise: {sunrise} | Sunset: {sunset} | Current Time: {currentTimeUTC}")
             if sunrise < currentTimeUTC < sunset:
                 try:
                     url = f"https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lng}&appid=6ece76affa411be60affa4ee66ee2d62&units=imperial"
                     response = requests.get(url)
                     x = response.json()
                     if x["cod"] != "404":
-                        name = x["name"]
+                        ws_name = x["name"]
                         temp = x["main"]["temp"]
                         wind = round(float(x["wind"]["speed"] * 0.869), 2)
+                        condition = x["weather"][0]["main"]
                         try:
                             windgust = round(float(x["wind"]["gust"] * 0.869), 2)
                         except KeyError:
@@ -79,23 +98,23 @@ def updatemarker(lat, lng, direction):
                             winddirection = "West"
                         elif 303.75 <= degrees <= 348.74:
                             winddirection = "Northwest"
-
-                        if windgust is None:
-                            print(
-                                f"The {name} weather station is currently reporting a wind speed of {wind} knots. The "
-                                f"wind is coming from the {winddirection} direction. The current temperature is {temp} "
-                                f"degrees Fahrenheit.")
+                        if 10.00 <= wind < 33.00 and winddirection in direction and temp >= 50.00 and condition not in [
+                            "Rain", "Snow", "Thunderstorm"]:
+                            print("Green: Optimal Conditions")
+                            if windgust is None:
+                                print(
+                                    f"At {name}, {ws_name} weather station is currently reporting a wind speed of {wind} "
+                                    f"knots. The wind is coming from the {winddirection} direction. The current temperature "
+                                    f"is {temp} degrees Fahrenheit.")
+                            else:
+                                print(
+                                    f"At {name}, {ws_name} weather station is currently reporting a wind speed of {wind} knots. The "
+                                    f"wind is coming from the {winddirection} direction. The gusts are reaching up to "
+                                    f"{windgust} knots. The current temperature is {temp} degrees Fahrenheit.")
+                        elif 10.00 <= wind < 40.00 and temp >= 30.00:
+                            print("Yellow: Suboptimal Conditions")
                         else:
-                            print(
-                                f"The {name} weather station is currently reporting a wind speed of {wind} knots. The "
-                                f"wind is coming from the {winddirection} direction. The gusts are reaching up to "
-                                f"{windgust} knots. The current temperature is {temp} degrees Fahrenheit.")
-                        if wind >= 10.00 and winddirection in direction and temp >= 50.00:
-                            print("Green")
-                        elif wind >= 10.00 and winddirection not in direction and temp >= 30.00:
-                            print("Yellow")
-                        else:
-                            print("Red")
+                            print("Red: Poor Conditions")
                 except requests.ConnectionError:
                     return "No Internet Connection"
             else:
@@ -113,5 +132,6 @@ while True:
         lat = launchsite["lat"]
         lng = launchsite["lng"]
         direction = launchsite["direction"]
-        updatemarker(lat, lng, direction)
-    time.sleep(3600)  # sleep for 1 hour
+        name = launchsite["Name"]
+        updatemarker(lat, lng, direction, name)
+    time.sleep(360)  # sleep for 1 hour = 3600 seconds
