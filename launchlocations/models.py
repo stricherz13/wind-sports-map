@@ -5,12 +5,12 @@ import uuid
 
 
 class Direction(models.Model):
-    direction_choices = (("N", "North"), ("NE", "Northeast"), ("E", "East"), ("SE", "Southeast"), ("S", "South"),
-                         ("SW", "Southwest"), ("W", "West"), ("NW", "Northwest"))
-    name = models.CharField(max_length=2, choices=direction_choices)
+    direction_choices = [("N", "North"), ("NE", "Northeast"), ("E", "East"), ("SE", "Southeast"), ("S", "South"),
+                         ("SW", "Southwest"), ("W", "West"), ("NW", "Northwest")]
+    direction = models.CharField(max_length=2, choices=direction_choices, default="N")
 
     def __str__(self):
-        return self.get_name_display()
+        return self.get_direction_display()
 
 
 class LaunchLocation(models.Model):
@@ -21,13 +21,13 @@ class LaunchLocation(models.Model):
     lng = models.FloatField(null=False)
     name = models.CharField(max_length=100, null=False)
     kites = models.BooleanField(default=False, null=False)
-    directions = models.ManyToManyField(Direction)
+    direction = models.ManyToManyField(Direction, blank=False)
     skill = models.CharField(max_length=15, choices=skill_choices, default="Beginner", null=False)
     parking = models.BooleanField(default=False, null=False)
     public = models.BooleanField(default=False, null=False)
     description = models.TextField()
     # picture = models.ImageField(upload_to='launchlocation', blank=True)
-    # user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='launchlocations')
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='launchlocations')
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
@@ -35,18 +35,19 @@ class LaunchLocation(models.Model):
 
 
 class Weather(models.Model):
-    id = models.ForeignKey('LaunchLocation', on_delete=models.CASCADE, unique=True, primary_key=True)
-    ws_name = models.CharField(max_length=100)
-    temp = models.FloatField()
-    wind = models.FloatField()
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    launch_id = models.ForeignKey('LaunchLocation', on_delete=models.CASCADE, null=True)
+    ws_name = models.CharField(max_length=100, null=True)
+    temp = models.FloatField(null=True)
+    wind = models.FloatField(null=True)
     windgust = models.FloatField(null=True)
-    winddirection = models.CharField(max_length=50)
-    condition = models.CharField(max_length=20)
+    winddirection = models.CharField(max_length=50, null=True)
+    condition = models.CharField(max_length=20, null=True)
     marker = models.CharField(max_length=10, default="red")
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return str(self.id)
+        return str(self.ws_name)
 
 
 2

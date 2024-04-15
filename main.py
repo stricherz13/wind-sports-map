@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import requests
 import time
@@ -67,6 +67,9 @@ def updatemarker(lat, lng, direction, name):
             sunrise = datetime.strptime(sunrise_str, "%Y-%m-%dT%H:%M:%S+00:00")
             sunset = datetime.strptime(sunset_str, "%Y-%m-%dT%H:%M:%S+00:00")
             # print(f"Sunrise: {sunrise} | Sunset: {sunset} | Current Time: {currentTimeUTC}")
+            if currentTimeUTC < sunrise:
+                sunrise -= timedelta(days=1)
+                sunset -= timedelta(days=1)
             if sunrise < currentTimeUTC < sunset:
                 try:
                     url = f"https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lng}&appid=6ece76affa411be60affa4ee66ee2d62&units=imperial"
@@ -98,21 +101,31 @@ def updatemarker(lat, lng, direction, name):
                             winddirection = "West"
                         elif 303.75 <= degrees <= 348.74:
                             winddirection = "Northwest"
-                        if 10.00 <= wind < 33.00 and winddirection in direction and temp >= 50.00 and condition not in [
+                        if 12.00 <= wind < 33.00 and winddirection in direction and temp >= 50.00 and condition not in [
                             "Rain", "Snow", "Thunderstorm"]:
                             print("Green: Optimal Conditions")
                             if windgust is None:
                                 print(
-                                    f"At {name}, {ws_name} weather station is currently reporting a wind speed of {wind} "
-                                    f"knots. The wind is coming from the {winddirection} direction. The current temperature "
-                                    f"is {temp} degrees Fahrenheit.")
+                                    f"At {name}, {ws_name} weather station is currently reporting a wind speed of {wind}"
+                                    f" knots. The wind is coming from the {winddirection} direction. The current "
+                                    f"temperature is {temp} degrees Fahrenheit.")
                             else:
                                 print(
-                                    f"At {name}, {ws_name} weather station is currently reporting a wind speed of {wind} knots. The "
-                                    f"wind is coming from the {winddirection} direction. The gusts are reaching up to "
+                                    f"At {name}, {ws_name} weather station is currently reporting a wind speed of {wind} knots. The"
+                                    f" wind is coming from the {winddirection} direction. The gusts are reaching up to "
                                     f"{windgust} knots. The current temperature is {temp} degrees Fahrenheit.")
                         elif 10.00 <= wind < 40.00 and temp >= 30.00:
                             print("Yellow: Suboptimal Conditions")
+                            if windgust is None:
+                                print(
+                                    f"At {name}, {ws_name} weather station is currently reporting a wind speed of {wind}"
+                                    f" knots. The wind is coming from the {winddirection} direction. The current "
+                                    f"temperature is {temp} degrees Fahrenheit.")
+                            else:
+                                print(
+                                    f"At {name}, {ws_name} weather station is currently reporting a wind speed of {wind} knots. The "
+                                    f" wind is coming from the {winddirection} direction. The gusts are reaching up to "
+                                    f"{windgust} knots. The current temperature is {temp} degrees Fahrenheit.")
                         else:
                             print("Red: Poor Conditions")
                 except requests.ConnectionError:
