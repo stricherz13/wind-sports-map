@@ -8,6 +8,7 @@ def update_weather_data():
     currentTimeUTC = datetime.utcnow()
     launch_locations = LaunchLocation.objects.all()
     for location in launch_locations:
+        print(f"Location: {location}")
         try:
             url = f"https://api.sunrise-sunset.org/json?lat={location.lat}&lng={location.lng}&formatted=0"
             response = requests.get(url)
@@ -20,6 +21,14 @@ def update_weather_data():
             sunset_str = data["results"]["sunset"]
             sunrise = datetime.strptime(sunrise_str, "%Y-%m-%dT%H:%M:%S+00:00")
             sunset = datetime.strptime(sunset_str, "%Y-%m-%dT%H:%M:%S+00:00")
+
+            ws_name = None
+            temp = None
+            wind = None
+            windgust = None
+            winddirection = None
+            condition = None
+            marker = "Gray"
 
             if currentTimeUTC < sunrise:
                 sunrise -= timedelta(days=1)
@@ -45,45 +54,31 @@ def update_weather_data():
                         degrees = float(x["wind"]["deg"])
                         winddirection = get_wind_direction(degrees)
 
-                        if (12.00 <= wind < 33.00 and winddirection in location.direction and temp >= 50.00 and
+                        location_direction = directionList()
+
+                        if (12.00 <= wind < 33.00 and winddirection in location_direction and temp >= 50.00 and
                                 condition not in ["Rain", "Snow", "Thunderstorm"]):
                             marker = "Green"
                         elif 10.00 <= wind < 40.00 and temp >= 30.00:
                             marker = "Yellow"
                         else:
                             marker = "Red"
-
-                        weather, created = Weather.objects.update_or_create(
-                            launch_id=location,
-                            defaults={
-                                'ws_name': ws_name,
-                                'temp': temp,
-                                'wind': wind,
-                                'windgust': windgust,
-                                'winddirection': winddirection,
-                                'condition': condition,
-                                'marker': marker
-                            }
-                        )
                 except requests.ConnectionError:
                     print("No Internet Connection")
                     continue
-            else:
-                marker = "Gray"
-                weather, created = Weather.objects.update_or_create(
-                    launch_id=location,
-                    defaults={
-                        'ws_name': None,
-                        'temp': None,
-                        'wind': None,
-                        'windgust': None,
-                        'winddirection': None,
-                        'condition': None,
-                        'marker': marker
-                    }
-                )
-                if not created:
-                    weather.save(update_fields=['marker'])
+
+            weather, created = Weather.objects.update_or_create(
+                launch_id=location,
+                defaults={
+                    'ws_name': ws_name,
+                    'temp': temp,
+                    'wind': wind,
+                    'windgust': windgust,
+                    'winddirection': winddirection,
+                    'condition': condition,
+                    'marker': marker
+                }
+            )
         except Exception as e:
             print(f"Error in request: {e}")
             continue
@@ -106,3 +101,11 @@ def get_wind_direction(degrees):
         return "West"
     elif 303.75 <= degrees <= 348.74:
         return "Northwest"
+
+
+def directionList():
+    location_direction = []
+    for direction in location.directions.all():
+        location_direction.append(direction.name)
+        print(location_direction)
+    return location_direction

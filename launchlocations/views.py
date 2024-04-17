@@ -1,10 +1,10 @@
 from django.http import JsonResponse
 from rest_framework.decorators import api_view
-from .models import Weather
+from .models import Weather, LaunchLocation
 from .serializers import WeatherDataSerializer
 
 @api_view(['GET'])
-def weather_view(request, pk):
+def weather_json(request, pk):
     try:
         weather = Weather.objects.get(pk=pk)
     except Weather.DoesNotExist:

@@ -1,16 +1,16 @@
 from django.db import models
-from django.utils import timezone
 from django.contrib.auth.models import User
 import uuid
+from multiselectfield import MultiSelectField
 
 
 class Direction(models.Model):
     direction_choices = [("N", "North"), ("NE", "Northeast"), ("E", "East"), ("SE", "Southeast"), ("S", "South"),
                          ("SW", "Southwest"), ("W", "West"), ("NW", "Northwest")]
-    direction = models.CharField(max_length=2, choices=direction_choices, default="N")
+    name = models.CharField(max_length=2, choices=direction_choices)
 
     def __str__(self):
-        return self.get_direction_display()
+        return self.name
 
 
 class LaunchLocation(models.Model):
@@ -35,7 +35,7 @@ class LaunchLocation(models.Model):
 
 
 class Weather(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    id = models.AutoField(primary_key=True, editable=False)
     launch_id = models.ForeignKey('LaunchLocation', on_delete=models.CASCADE, null=True)
     ws_name = models.CharField(max_length=100, null=True)
     temp = models.FloatField(null=True)
