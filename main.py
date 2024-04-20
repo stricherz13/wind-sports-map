@@ -51,7 +51,19 @@ launchsites = [
         "lat": 42.564415590075406,
         "lng": -79.13901397057322,
         "direction": ["North", "Southwest", "West", "Northwest"]
-    }
+    },
+    {
+        "Name": "Canadian Hole",
+        "lat": 35.297730,
+        "lng": -75.514420,
+        "direction": ["North","Northwest", "South", "Southeast", "Northeast"]
+    },
+    {
+        "Name": "Beasley Gulf Side",
+        "lat": 30.393125242988663,
+        "lng": -86.58403562407895,
+        "direction": ["East", "Northeast", "Northwest", "West", "Southwest", "Southeast"]
+    },
 ]
 
 
@@ -147,4 +159,4 @@ while True:
         direction = launchsite["direction"]
         name = launchsite["Name"]
         updatemarker(lat, lng, direction, name)
-    time.sleep(360)  # sleep for 1 hour = 3600 seconds
+    time.sleep(3600)  # sleep for 1 hour = 3600 seconds

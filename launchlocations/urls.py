@@ -1,7 +1,9 @@
-from django.urls import path
-from . import views
+from django.urls import path, include
+from .views import LaunchLocationListView, LaunchLocationDetailView, WeatherDataListView, WeatherDataDetailView
 
 urlpatterns = [
-    # other url patterns...
-    path('weather/<int:pk>/', views.weather_json, name='weather_view'),
+    path('LaunchLocations/', LaunchLocationListView.as_view()),
+    path('LaunchLocations/<uuid:pk>/', LaunchLocationDetailView.as_view()),
+    path('WeatherStations/', WeatherDataListView.as_view()),
+    path('WeatherStations/<int:pk>/', WeatherDataDetailView.as_view()),
 ]

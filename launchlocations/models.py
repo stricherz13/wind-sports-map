@@ -1,7 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
 import uuid
-from multiselectfield import MultiSelectField
 
 
 class Direction(models.Model):
@@ -26,8 +25,9 @@ class LaunchLocation(models.Model):
     parking = models.BooleanField(default=False, null=False)
     public = models.BooleanField(default=False, null=False)
     description = models.TextField()
+    weatherstation = models.ForeignKey('Weather', null=True, on_delete=models.SET_NULL, related_name='launchlocations')
     # picture = models.ImageField(upload_to='launchlocation', blank=True)
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='launchlocations')
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='users')
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):

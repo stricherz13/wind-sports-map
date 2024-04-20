@@ -1,14 +1,22 @@
-from django.http import JsonResponse
-from rest_framework.decorators import api_view
+from rest_framework import generics
 from .models import Weather, LaunchLocation
-from .serializers import WeatherDataSerializer
+from .serializers import WeatherDataSerializer, LaunchLocationSerializer
 
-@api_view(['GET'])
-def weather_json(request, pk):
-    try:
-        weather = Weather.objects.get(pk=pk)
-    except Weather.DoesNotExist:
-        return JsonResponse({'error': 'Weather not found'}, status=404)
 
-    serializer = WeatherDataSerializer(weather)
-    return JsonResponse(serializer.data, safe=False)
+class LaunchLocationListView(generics.ListCreateAPIView):
+    queryset = LaunchLocation.objects.all()
+    serializer_class = LaunchLocationSerializer
+
+
+class LaunchLocationDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = LaunchLocation.objects.all()
+    serializer_class = LaunchLocationSerializer
+
+
+class WeatherDataListView(generics.ListAPIView):
+    queryset = Weather.objects.all()
+    serializer_class = WeatherDataSerializer
+
+class WeatherDataDetailView(generics.ListAPIView):
+    queryset = Weather.objects.all()
+    serializer_class = WeatherDataSerializer

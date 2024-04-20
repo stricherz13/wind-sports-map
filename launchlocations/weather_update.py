@@ -8,6 +8,8 @@ def update_weather_data():
     currentTimeUTC = datetime.utcnow()
     launch_locations = LaunchLocation.objects.all()
     for location in launch_locations:
+        for direction in location.direction.get(location.id):
+            print(direction.name)
         print(f"Location: {location}")
         try:
             url = f"https://api.sunrise-sunset.org/json?lat={location.lat}&lng={location.lng}&formatted=0"
