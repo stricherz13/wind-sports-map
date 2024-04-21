@@ -1,4 +1,3 @@
-import os
 from datetime import datetime, timedelta
 import requests
 from .models import LaunchLocation, Weather
@@ -8,7 +7,7 @@ def update_weather_data():
     currentTimeUTC = datetime.utcnow()
     launch_locations = LaunchLocation.objects.all()
     for location in launch_locations:
-        for direction in location.direction.get(location.id):
+        for direction in location.direction.all():
             print(direction.name)
         print(f"Location: {location}")
         try:
@@ -56,7 +55,7 @@ def update_weather_data():
                         degrees = float(x["wind"]["deg"])
                         winddirection = get_wind_direction(degrees)
 
-                        location_direction = directionList()
+                        location_direction = directionList(location)
 
                         if (12.00 <= wind < 33.00 and winddirection in location_direction and temp >= 50.00 and
                                 condition not in ["Rain", "Snow", "Thunderstorm"]):
@@ -105,9 +104,9 @@ def get_wind_direction(degrees):
         return "Northwest"
 
 
-def directionList():
+def directionList(location):
     location_direction = []
-    for direction in location.directions.all():
+    for direction in location.direction.all():
         location_direction.append(direction.name)
         print(location_direction)
     return location_direction

@@ -9,7 +9,7 @@ class Direction(models.Model):
     name = models.CharField(max_length=2, choices=direction_choices)
 
     def __str__(self):
-        return self.name
+        return self.get_name_display()
 
 
 class LaunchLocation(models.Model):
@@ -48,6 +48,3 @@ class Weather(models.Model):
 
     def __str__(self):
         return str(self.ws_name)
-
-
-2
