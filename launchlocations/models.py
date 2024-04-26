@@ -9,7 +9,7 @@ class Direction(models.Model):
     name = models.CharField(max_length=2, choices=direction_choices)
 
     def __str__(self):
-        return self.get_name_display()
+        return self.name
 
 
 class LaunchLocation(models.Model):
@@ -25,10 +25,12 @@ class LaunchLocation(models.Model):
     parking = models.BooleanField(default=False, null=False)
     public = models.BooleanField(default=False, null=False)
     description = models.TextField()
-    weatherstation = models.ForeignKey('Weather', null=True, on_delete=models.SET_NULL, related_name='launchlocations')
-    # picture = models.ImageField(upload_to='launchlocation', blank=True)
+    weatherstation = models.OneToOneField('Weather', null=True, on_delete=models.SET_NULL)
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='users')
     updated_at = models.DateTimeField(auto_now=True)
+
+    def get_user_full_name(self):
+        return f"{self.user.first_name} {self.user.last_name}"
 
     def __str__(self):
         return str(self.name)

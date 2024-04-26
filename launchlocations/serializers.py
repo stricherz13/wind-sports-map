@@ -10,6 +10,8 @@ class WeatherDataSerializer(serializers.ModelSerializer):
 
 class LaunchLocationSerializer(serializers.ModelSerializer):
     weatherstation = WeatherDataSerializer(many=False, read_only=True)
+    user = serializers.StringRelatedField()
+    direction = serializers.StringRelatedField(many=True)
 
     class Meta:
         model = LaunchLocation

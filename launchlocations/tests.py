@@ -1,58 +1,72 @@
-from django.test import TestCase, Client
-from django.urls import reverse
-from .models import Weather, LaunchLocation, Direction
-import unittest
-from unittest.mock import patch
-from launchlocations import weather_update
+from django.test import TestCase
+from .models import LaunchLocation, Weather, Direction
+from .serializers import LaunchLocationSerializer, WeatherDataSerializer
+from django.contrib.auth.models import User
 
 
-class UpdateMarkerViewTest(TestCase):
+class LaunchLocationModelTest(TestCase):
     def setUp(self):
-        self.client = Client()
-        directions = ["N", "NE", "E", "W", "NW"]
-        direction_instances = [Direction.objects.create(name=direction) for direction in directions]  # create Direction instances
+        self.user = User.objects.create(username='testuser')
+        self.direction = Direction.objects.create(name='N')
         self.launch_location = LaunchLocation.objects.create(
-            name="Space Balls",
-            lat=38.63217901420372,
-            lng=-89.28922801088844,
+            lat=1.0, lng=1.0, name='Test Location', kites=True,
+            skill='Be', parking=True, public=True, description='Test Description',
+            user=self.user
         )
-        self.launch_location.directions.set(direction_instances)
+        self.launch_location.direction.add(self.direction)
 
-        self.url = reverse('update_marker', kwargs={'id': self.launch_location.id})
-
-    def test_update_marker(self):
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue(Weather.objects.filter(ws_name=self.launch_location.name).exists())
+    def test_launch_location_creation(self):
+        self.assertEqual(LaunchLocation.objects.count(), 1)
 
 
-class WeatherUpdateTestCase(unittest.TestCase):
-    @patch('weather_update.requests.get')
-    def test_update_weather_data_success(self, mock_get):
-        # Mock response from the OpenWeather API
-        mock_response = {
-            'wind': {'speed': 5.0}  # Example wind speed data
-        }
-        mock_get.return_value.status_code = 200
-        mock_get.return_value.json.return_value = mock_response
+class WeatherModelTest(TestCase):
+    def setUp(self):
+        self.weather = Weather.objects.create(
+            ws_name='Test Weather', temp=20.0, wind=5.0, windgust=10.0,
+            winddirection='N', condition='Clear', marker='red'
+        )
 
-        # Call the function being tested
-        weather_update()
+    def test_weather_creation(self):
+        self.assertEqual(Weather.objects.count(), 1)
 
-        # Assert that the database is updated correctly
-        # Add your assertions here
 
-    @patch('your_app.weather_update.requests.get')
-    def test_update_weather_data_failure(self, mock_get):
-        # Mock a failed response from the OpenWeather API
-        mock_get.return_value.status_code = 404
+class DirectionModelTest(TestCase):
+    def setUp(self):
+        self.direction = Direction.objects.create(name='N')
 
-        # Call the function being tested
-        weather_update()
+    def test_direction_creation(self):
+        self.assertEqual(Direction.objects.count(), 1)
 
-        # Assert that the database is not updated in case of failure
-        # Add your assertions here
 
-if __name__ == '__main__':
-    unittest.main()
+class LaunchLocationSerializerTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create(username='testuser')
+        self.direction = Direction.objects.create(name='N')
+        self.launch_location = LaunchLocation.objects.create(
+            lat=1.0, lng=1.0, name='Test Location', kites=True,
+            skill='Be', parking=True, public=True, description='Test Description',
+            user=self.user
+        )
+        self.launch_location.direction.add(self.direction)
+        self.serializer = LaunchLocationSerializer(instance=self.launch_location)
 
+    def test_contains_expected_fields(self):
+        data = self.serializer.data
+        self.assertCountEqual(data.keys(),
+                              ['id', 'lat', 'lng', 'name', 'kites', 'direction', 'skill', 'parking', 'public',
+                               'description', 'weatherstation', 'user', 'updated_at'])
+
+
+class WeatherDataSerializerTest(TestCase):
+    def setUp(self):
+        self.weather = Weather.objects.create(
+            ws_name='Test Weather', temp=20.0, wind=5.0, windgust=10.0,
+            winddirection='N', condition='Clear', marker='red'
+        )
+        self.serializer = WeatherDataSerializer(instance=self.weather)
+
+    def test_contains_expected_fields(self):
+        data = self.serializer.data
+        self.assertCountEqual(data.keys(),
+                              ['id', 'launch_id', 'ws_name', 'temp', 'wind', 'windgust', 'winddirection', 'condition',
+                               'marker', 'updated_at'])

@@ -42,8 +42,6 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
-    'allauth.socialaccount.providers.facebook',
-    'allauth.socialaccount.providers.strava',
 ]
 
 MIDDLEWARE = [
@@ -130,9 +128,9 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CRONJOBS = [
-    ('0 * * * *', 'launchlocations.weather_update.update_weather_data', 'update_weather_data')
-]
+# CRONJOBS = [
+#     ('0 * * * *', 'launchlocations.weather_update.update_weather_data', 'update_weather_data')
+# ]
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
@@ -145,6 +143,3 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_EMAIL_REQUIRED = True
-
-
-
