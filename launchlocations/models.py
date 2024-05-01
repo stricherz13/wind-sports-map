@@ -1,39 +1,7 @@
+import requests
 from django.db import models
 from django.contrib.auth.models import User
 import uuid
-
-
-class Direction(models.Model):
-    direction_choices = [("N", "North"), ("NE", "Northeast"), ("E", "East"), ("SE", "Southeast"), ("S", "South"),
-                         ("SW", "Southwest"), ("W", "West"), ("NW", "Northwest")]
-    name = models.CharField(max_length=2, choices=direction_choices)
-
-    def __str__(self):
-        return self.name
-
-
-class LaunchLocation(models.Model):
-    skill_choices = (("Be", "Beginner"), ("In", "Intermediate"), ("Ad", "Advanced"))
-
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    lat = models.FloatField(null=False)
-    lng = models.FloatField(null=False)
-    name = models.CharField(max_length=100, null=False)
-    kites = models.BooleanField(default=False, null=False)
-    direction = models.ManyToManyField(Direction, blank=False)
-    skill = models.CharField(max_length=15, choices=skill_choices, default="Beginner", null=False)
-    parking = models.BooleanField(default=False, null=False)
-    public = models.BooleanField(default=False, null=False)
-    description = models.TextField()
-    weatherstation = models.OneToOneField('Weather', null=True, on_delete=models.SET_NULL)
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='users')
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def get_user_full_name(self):
-        return f"{self.user.first_name} {self.user.last_name}"
-
-    def __str__(self):
-        return str(self.name)
 
 
 class Weather(models.Model):
@@ -50,3 +18,38 @@ class Weather(models.Model):
 
     def __str__(self):
         return str(self.ws_name)
+
+
+class Direction(models.Model):
+    direction_choices = [("N", "North"), ("NE", "Northeast"), ("E", "East"), ("SE", "Southeast"), ("S", "South"),
+                         ("SW", "Southwest"), ("W", "West"), ("NW", "Northwest")]
+    name = models.CharField(max_length=2, choices=direction_choices)
+
+    def __str__(self):
+        return self.name
+
+
+class LaunchLocation(models.Model):
+    skill_choices = (("Be", "Beginner"), ("In", "Intermediate"), ("Ad", "Advanced"))
+    STATUS_CHOICES = [('DR', 'Draft'), ('AP', 'Approved'), ('PU', 'Published'), ('RE', 'Rejected'), ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    lat = models.FloatField(null=False)
+    lng = models.FloatField(null=False)
+    name = models.CharField(max_length=100, null=False)
+    kites = models.BooleanField(default=False, null=False)
+    direction = models.ManyToManyField(Direction, blank=False)
+    skill = models.CharField(max_length=15, choices=skill_choices, default="Beginner", null=False)
+    parking = models.BooleanField(default=False, null=False)
+    public = models.BooleanField(default=False, null=False)
+    description = models.TextField()
+    weatherstation = models.OneToOneField('Weather', null=True, on_delete=models.SET_NULL)
+    status = models.CharField(max_length=2, choices=STATUS_CHOICES, default='DR')
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='users')
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def get_user_full_name(self):
+        return f"{self.user.first_name} {self.user.last_name}"
+
+    def __str__(self):
+        return str(self.name)

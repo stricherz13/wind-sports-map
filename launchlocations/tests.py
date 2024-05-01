@@ -1,10 +1,11 @@
 from django.test import TestCase
+from django.contrib.auth.models import User
 from .models import LaunchLocation, Weather, Direction
 from .serializers import LaunchLocationSerializer, WeatherDataSerializer
 from django.contrib.auth.models import User
 
 
-class LaunchLocationModelTest(TestCase):
+class LaunchLocationModelTest1(TestCase):
     def setUp(self):
         self.user = User.objects.create(username='testuser')
         self.direction = Direction.objects.create(name='N')
@@ -54,7 +55,7 @@ class LaunchLocationSerializerTest(TestCase):
         data = self.serializer.data
         self.assertCountEqual(data.keys(),
                               ['id', 'lat', 'lng', 'name', 'kites', 'direction', 'skill', 'parking', 'public',
-                               'description', 'weatherstation', 'user', 'updated_at'])
+                               'description', 'weatherstation', 'user', 'updated_at', 'status'])
 
 
 class WeatherDataSerializerTest(TestCase):
@@ -70,3 +71,49 @@ class WeatherDataSerializerTest(TestCase):
         self.assertCountEqual(data.keys(),
                               ['id', 'launch_id', 'ws_name', 'temp', 'wind', 'windgust', 'winddirection', 'condition',
                                'marker', 'updated_at'])
+
+class LaunchLocationModelTest2(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='testuser', password='12345')
+        self.directions = Direction.objects.bulk_create([
+            Direction(name='SW'),
+            Direction(name='W'),
+            Direction(name='NW'),
+            Direction(name='N')
+        ])
+
+    def test_create_launch_location(self):
+        new_location = LaunchLocation.objects.create(
+            lat=42.402870500131954,
+            lng=-86.28366931556243,
+            name='South Haven',
+            kites=True,
+            skill='Be',
+            parking=True,
+            public=True,
+            description='Body drag out through swim buoys then ride. Same coming in. Good beach for beginners with plenty of space. (2013)',
+            status='DR',
+            user=self.user
+        )
+        new_location.direction.set(self.directions)
+
+        self.assertEqual(LaunchLocation.objects.count(), 1)
+        self.assertEqual(new_location.direction.count(), 4)
+
+    def test_post_save_signal(self):
+        new_location = LaunchLocation.objects.create(
+            lat=42.402870500131954,
+            lng=-86.28366931556243,
+            name='South Haven',
+            kites=True,
+            skill='Be',
+            parking=True,
+            public=True,
+            description='Body drag out through swim buoys then ride. Same coming in. Good beach for beginners with plenty of space. (2013)',
+            status='DR',
+            user=self.user
+        )
+        new_location.direction.set(self.directions)
+
+        # Assuming your post_save signal creates a Weather instance
+        self.assertEqual(Weather.objects.filter(launch_id=new_location).count(), 1)
