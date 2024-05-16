@@ -7,6 +7,7 @@ from .models import LaunchLocation, Weather
 @receiver(post_save, sender=LaunchLocation)
 def create_weatherstation(sender, instance, created, **kwargs):
     if created:
+        print(f"Creating Weather instance for LaunchLocation: {instance.id}")
         try:
             url = f"https://api.openweathermap.org/data/2.5/weather?lat={instance.lat}&lon={instance.lng}&appid=6ece76affa411be60affa4ee66ee2d62&units=imperial"
             response = requests.get(url)
@@ -26,8 +27,12 @@ def create_weatherstation(sender, instance, created, **kwargs):
 
                 location_direction = directionList(instance)
 
-                if (12.00 <= wind < 33.00 and winddirection in location_direction and temp >= 50.00 and
-                        condition not in ["Rain", "Snow", "Thunderstorm"]):
+                if (
+                    12.00 <= wind < 33.00
+                    and winddirection in location_direction
+                    and temp >= 50.00
+                    and condition not in ["Rain", "Snow", "Thunderstorm"]
+                ):
                     marker = "Green"
                 elif 10.00 <= wind < 40.00 and temp >= 30.00:
                     marker = "Yellow"
@@ -42,8 +47,14 @@ def create_weatherstation(sender, instance, created, **kwargs):
                     windgust=windgust,
                     winddirection=winddirection,
                     condition=condition,
-                    marker=marker
+                    marker=marker,
                 )
+                print(f"Weather instance created with ID: {weather.id}")
+
+                # Link the weatherstation to the launch location
+                instance.weatherstation = weather
+                instance.save()
+                print(f"Weather instance linked to LaunchLocation: {instance.id}")
         except requests.ConnectionError:
             print("No Internet Connection")
         except Exception as e:

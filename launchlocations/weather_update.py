@@ -57,8 +57,12 @@ def update_weather_data():
 
                         location_direction = directionList(location)
 
-                        if (12.00 <= wind < 33.00 and winddirection in location_direction and temp >= 50.00 and
-                                condition not in ["Rain", "Snow", "Thunderstorm"]):
+                        if (
+                            12.00 <= wind < 33.00
+                            and winddirection in location_direction
+                            and temp >= 50.00
+                            and condition not in ["Rain", "Snow", "Thunderstorm"]
+                        ):
                             marker = "Green"
                         elif 10.00 <= wind < 40.00 and temp >= 30.00:
                             marker = "Yellow"
@@ -71,14 +75,14 @@ def update_weather_data():
             weather, created = Weather.objects.update_or_create(
                 launch_id=location,
                 defaults={
-                    'ws_name': ws_name,
-                    'temp': temp,
-                    'wind': wind,
-                    'windgust': windgust,
-                    'winddirection': winddirection,
-                    'condition': condition,
-                    'marker': marker
-                }
+                    "ws_name": ws_name,
+                    "temp": temp,
+                    "wind": wind,
+                    "windgust": windgust,
+                    "winddirection": winddirection,
+                    "condition": condition,
+                    "marker": marker,
+                },
             )
         except Exception as e:
             print(f"Error in request: {e}")
